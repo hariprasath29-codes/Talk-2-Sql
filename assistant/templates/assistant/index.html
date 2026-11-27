@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talk2SQL Chat</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f7f7f8;
+            color: #212529;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Top Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .header-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .new-chat-btn {
+            background: transparent;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .new-chat-btn:hover { background: #f3f4f6; }
+
+        /* Chat Area */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .chat-inner {
+            width: 100%;
+            max-width: 860px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Welcome screen when empty */
+        .welcome-box {
+            text-align: center;
+            margin: auto 0;
+            padding: 40px 20px;
+        }
+        .welcome-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        .welcome-sub {
+            font-size: 15px;
+            color: #6b7280;
+            max-width: 580px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Message Bubbles */
+        .message-row {
+            display: flex;
+            width: 100%;
+        }
+        .message-row.user {
+            justify-content: flex-end;
+        }
+        .message-row.assistant {
+            justify-content: flex-start;
+        }
+
+        .user-bubble {
+            background-color: #2563eb;
+            color: #ffffff;
+            padding: 12px 18px;
+            border-radius: 18px 18px 4px 18px;
+            max-width: 75%;
+            font-size: 15px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .assistant-bubble {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            padding: 16px 20px;
+            border-radius: 18px 18px 18px 4px;
+            width: 100%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        /* Info badge */
+        .info-badge {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        /* Table inside bubble */
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 8px;
+            margin-bottom: 8px;
+            max-height: 460px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #e5e7eb;
+            padding: 9px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #4b5563;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) { background-color: #f9fafb; }
+
+        .badge-pass {
+            background-color: #dcfce7;
+            color: #15803d;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-fail {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Footer row inside assistant bubble */
+        .assistant-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .model-badge {
+            font-size: 11px;
+            color: #4b5563;
+            background: #f3f4f6;
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        /* Collapsible SQL preview */
+        details {
+            font-size: 12px;
+            color: #6b7280;
+            flex: 1;
+        }
+        details summary {
+            cursor: pointer;
+            user-select: none;
+            outline: none;
+            font-weight: 500;
+        }
+        details summary:hover { color: #2563eb; }
+        pre.sql-box {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 10px 14px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-top: 6px;
+            font-size: 13px;
+        }
+
+        .error-msg {
+            color: #dc2626;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .empty-msg {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Bottom Input Bar */
+        .input-bar-wrapper {
+            background: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            padding: 14px 20px 18px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .input-outer {
+            width: 100%;
+            max-width: 860px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        /* Selected file pill */
+        .file-pill {
+            display: none;
+            align-self: flex-start;
+            align-items: center;
+            gap: 8px;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid #bae6fd;
+        }
+        .file-pill.visible { display: inline-flex; }
+        .remove-file-btn {
+            background: none;
+            border: none;
+            color: #0369a1;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0;
+            font-weight: bold;
+        }
+
+        .input-form {
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border: 1.5px solid #d1d5db;
+            border-radius: 30px;
+            padding: 6px 10px 6px 14px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .input-form:focus-within {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        /* Attachment Paperclip Button */
+        .attach-btn {
+            background: none;
+            border: none;
+            color: #6b7280;
+            padding: 6px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s, background 0.15s;
+            margin-right: 8px;
+        }
+        .attach-btn:hover {
+            color: #2563eb;
+            background: #f1f5f9;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            color: #111827;
+            background: transparent;
+            padding: 8px 0;
+            min-width: 120px;
+        }
+
+        /* Model Selector Dropdown inside input bar */
+        .model-select {
+            border: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+            color: #374151;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 10px;
+            border-radius: 16px;
+            outline: none;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .model-select:hover, .model-select:focus {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .execute-btn {
+            background-color: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .execute-btn:hover {
+            background-color: #1d4ed8;
+        }
+        .hint-text {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 6px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Talk2SQL
+        </div>
+        <form method="POST" style="margin: 0;">
+            {% csrf_token %}
+            <button type="submit" name="clear_chat" value="1" class="new-chat-btn">+ New Chat</button>
+        </form>
+    </div>
+
+    <!-- Chat Stream -->
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-inner">
+            {% if not chat_history %}
+                <div class="welcome-box">
+                    <div class="welcome-title">College Database Assistant</div>
+                    <div class="welcome-sub">
+                        Ask any question about students, teachers, or <strong>upload your own .json / .csv dataset</strong> using the paperclip button below.
+                    </div>
+                </div>
+            {% else %}
+                {% for msg in chat_history %}
+                    <!-- User Message -->
+                    <div class="message-row user">
+                        <div class="user-bubble">{{ msg.user }}</div>
+                    </div>
+
+                    <!-- Assistant Response -->
+                    <div class="message-row assistant">
+                        <div class="assistant-bubble">
+                            {% if msg.info %}
+                                <div class="info-badge">{{ msg.info|safe }}</div>
+                            {% endif %}
+
+                            {% if msg.error %}
+                                <div class="error-msg">{{ msg.error }}</div>
+                            {% elif msg.rows %}
+                                <div style="font-size: 12px; color: #6b7280; margin-bottom: 6px;">
+                                    Found <strong>{{ msg.rows|length }}</strong> record{{ msg.rows|pluralize }}:
+                                </div>
+                                <div class="table-responsive">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                {% for col in msg.columns %}<th>{{ col }}</th>{% endfor %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for row in msg.rows %}
+                                                <tr>
+                                                    {% for cell in row %}
+                                                        <td>
+                                                            {% if cell == 'Pass' %}
+                                                                <span class="badge-pass">Pass</span>
+                                                            {% elif cell == 'Fail' %}
+                                                                <span class="badge-fail">Fail</span>
+                                                            {% else %}
+                                                                {{ cell }}
+                                                            {% endif %}
+                                                        </td>
+                                                    {% endfor %}
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% elif not msg.info %}
+                                <div class="empty-msg">No records found.</div>
+                            {% endif %}
+
+                            {% if msg.sql or msg.model_used %}
+                                <div class="assistant-footer">
+                                    {% if msg.sql %}
+                                        <details>
+                                            <summary>View SQL Query</summary>
+                                            <pre class="sql-box">{{ msg.sql }}</pre>
+                                        </details>
+                                    {% endif %}
+                                    {% if msg.model_used %}
+                                        <span class="model-badge">{{ msg.model_used }}</span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="input-bar-wrapper">
+        <div class="input-outer">
+            <!-- Selected File Badge -->
+            <div id="filePill" class="file-pill">
+                <span>📎 <span id="fileName">dataset.json</span></span>
+                <button type="button" class="remove-file-btn" onclick="clearSelectedFile()">✕</button>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" class="input-form" id="chatForm">
+                {% csrf_token %}
+                
+                <!-- Attachment Button (Paperclip) -->
+                <label for="fileUpload" class="attach-btn" title="Upload dataset (.json, .csv)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                    </svg>
+                </label>
+                <input type="file" id="fileUpload" name="dataset_file" accept=".json,.csv" multiple style="display: none;" onchange="handleFileSelected(this)">
+
+                <input 
+                    type="text" 
+                    name="question" 
+                    id="questionInput" 
+                    class="chat-input" 
+                    placeholder="Message Talk2SQL or upload dataset via 📎..." 
+                    autocomplete="off" 
+                    autofocus
+                >
+
+                <!-- Model Selector Dropdown -->
+                <select name="selected_model" class="model-select" title="Choose AI Model">
+                    <option value="groq" {% if selected_model == "groq" or not selected_model %}selected{% endif %}>Groq (GPT-OSS 120B)</option>
+                    <option value="gemini" {% if selected_model == "gemini" %}selected{% endif %}>Google (Gemini 3.8 Flash)</option>
+                    <option value="openrouter" {% if selected_model == "openrouter" %}selected{% endif %}>OpenRouter (Free)</option>
+                </select>
+
+                <button type="submit" class="execute-btn">
+                    Execute
+                </button>
+            </form>
+        </div>
+        <div class="hint-text">Upload .json or .csv via 📎, or ask any database question. Press Enter to send.</div>
+    </div>
+
+    <script>
+        function handleFileSelected(input) {
+            if (input.files && input.files.length > 0) {
+                const names = Array.from(input.files).map(f => f.name).join(', ');
+                document.getElementById('fileName').textContent = names;
+                document.getElementById('filePill').classList.add('visible');
+                document.getElementById('questionInput').placeholder = "Ask a question about this file or click Execute to import...";
+            }
+        }
+
+        function clearSelectedFile() {
+            const input = document.getElementById('fileUpload');
+            input.value = '';
+            document.getElementById('filePill').classList.remove('visible');
+            document.getElementById('questionInput').placeholder = "Message Talk2SQL or upload dataset via 📎...";
+        }
+
+        // Scroll to the bottom on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            document.getElementById('questionInput').focus();
+        });
+    </script>
+</body>
+</html>

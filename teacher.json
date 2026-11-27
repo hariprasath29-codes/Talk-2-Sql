@@ -1,0 +1,82 @@
+[
+  {
+    "teacher_id": 101,
+    "name": "Dr. Aravind Swamy",
+    "subject": "Artificial Intelligence",
+    "department": "AI & DS",
+    "experience_years": 12,
+    "hod_name": "Dr. Aravind Swamy"
+  },
+  {
+    "teacher_id": 102,
+    "name": "Dr. Meenakshi Sundaram",
+    "subject": "Machine Learning",
+    "department": "AI & ML",
+    "experience_years": 10,
+    "hod_name": "Dr. Meenakshi Sundaram"
+  },
+  {
+    "teacher_id": 103,
+    "name": "Prof. Rajesh Kumar",
+    "subject": "Python",
+    "department": "CSE",
+    "experience_years": 7,
+    "hod_name": "Dr. Karthikeyan N"
+  },
+  {
+    "teacher_id": 104,
+    "name": "Dr. Shalini Raman",
+    "subject": "Deep Learning",
+    "department": "AI & DS",
+    "experience_years": 9,
+    "hod_name": "Dr. Aravind Swamy"
+  },
+  {
+    "teacher_id": 105,
+    "name": "Prof. Venkatesh Iyer",
+    "subject": "Maths",
+    "department": "IT",
+    "experience_years": 15,
+    "hod_name": "Prof. Venkatesh Iyer"
+  },
+  {
+    "teacher_id": 106,
+    "name": "Dr. Karthikeyan N",
+    "subject": "Machine Learning",
+    "department": "CSE",
+    "experience_years": 8,
+    "hod_name": "Dr. Karthikeyan N"
+  },
+  {
+    "teacher_id": 107,
+    "name": "Prof. Ananya Sen",
+    "subject": "Artificial Intelligence",
+    "department": "AI & ML",
+    "experience_years": 6,
+    "hod_name": "Dr. Meenakshi Sundaram"
+  },
+  {
+    "teacher_id": 108,
+    "name": "Prof. Suresh Babu",
+    "subject": "Python",
+    "department": "IT",
+    "experience_years": 11,
+    "hod_name": "Prof. Venkatesh Iyer"
+  },
+  {
+    "teacher_id": 109,
+    "name": "Dr. Geetha Narayanan",
+    "subject": "Deep Learning",
+    "department": "AI & ML",
+    "experience_years": 14,
+    "hod_name": "Dr. Meenakshi Sundaram"
+  },
+  {
+    "teacher_id": 110,
+    "name": "Prof. Manoj Sharma",
+    "subject": "Maths",
+    "department": "CSE",
+    "experience_years": 13,
+    "hod_name": "Dr. Karthikeyan N"
+  }
+]
